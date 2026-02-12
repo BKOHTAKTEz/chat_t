@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Общий чат - Личные сообщения - Группы</title>
+    <title>Чат - Удаление и ответы</title>
     <style>
         /* =============================================
-           ОРИГИНАЛЬНЫЕ ЦВЕТА ИЗ НАЧАЛЬНОГО КОДА
+           ОРИГИНАЛЬНЫЕ ЦВЕТА
            ============================================= */
         :root {
             --primary: #4a76a8;
@@ -24,6 +24,8 @@
             --sidebar-bg: #ffffff;
             --private: #9b59b6;
             --group: #3498db;
+            --reply-color: #95a5a6;
+            --deleted-color: #95a5a6;
         }
         
         body.dark-theme {
@@ -35,6 +37,8 @@
             --message-bg: #2d3748;
             --my-message-bg: #2c5282;
             --sidebar-bg: #16213e;
+            --reply-color: #718096;
+            --deleted-color: #718096;
         }
         
         * {
@@ -56,7 +60,7 @@
         }
         
         /* =============================================
-           ИСПРАВЛЕННОЕ МОБИЛЬНОЕ МЕНЮ (РАБОТАЕТ!)
+           МОБИЛЬНОЕ МЕНЮ
            ============================================= */
         .mobile-nav {
             position: fixed;
@@ -172,7 +176,7 @@
         }
         
         /* =============================================
-           СООБЩЕНИЯ
+           СООБЩЕНИЯ С КНОПКАМИ ДЕЙСТВИЙ
            ============================================= */
         .messages-container {
             flex: 1;
@@ -189,6 +193,7 @@
             gap: 10px;
             max-width: 85%;
             animation: messageAppear 0.3s ease;
+            position: relative;
         }
         
         @keyframes messageAppear {
@@ -213,6 +218,7 @@
         .message-content {
             flex: 1;
             min-width: 0;
+            position: relative;
         }
         
         .message-bubble {
@@ -253,8 +259,130 @@
             word-break: break-word;
         }
         
+        /* УДАЛЕННОЕ СООБЩЕНИЕ */
+        .message-text.deleted {
+            color: var(--deleted-color);
+            font-style: italic;
+        }
+        
+        /* БЛОК ОТВЕТА */
+        .reply-block {
+            background: rgba(0,0,0,0.05);
+            border-left: 3px solid var(--primary);
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--reply-color);
+        }
+        
+        .dark-theme .reply-block {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .reply-author {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+        
+        .reply-text {
+            word-break: break-word;
+        }
+        
+        /* КНОПКИ ДЕЙСТВИЙ НАД СООБЩЕНИЕМ */
+        .message-actions {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            display: flex;
+            gap: 4px;
+            background: var(--light);
+            border-radius: 20px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .message.my-message .message-actions {
+            right: auto;
+            left: 0;
+        }
+        
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+        
+        .message-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--dark);
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .message-action-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .message-action-btn.delete {
+            color: var(--danger);
+        }
+        
+        .message-action-btn.reply {
+            color: var(--primary);
+        }
+        
+        /* ПАНЕЛЬ ОТВЕТА */
+        .reply-panel {
+            background: var(--light);
+            border-top: 1px solid var(--border);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .reply-info {
+            flex: 1;
+            background: rgba(74, 118, 168, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reply-info span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .cancel-reply {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--gray);
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
         /* =============================================
-           ПАНЕЛЬ ВВОДА (БЕЗ СКРЕПКИ!)
+           ПАНЕЛЬ ВВОДА
            ============================================= */
         .input-panel {
             background: var(--light);
@@ -530,6 +658,14 @@
             .chat-view {
                 flex: 1;
             }
+            
+            .message-actions {
+                opacity: 0;
+            }
+            
+            .message:hover .message-actions {
+                opacity: 1;
+            }
         }
         
         /* =============================================
@@ -585,7 +721,7 @@
 </head>
 <body>
     <!-- ========================================= -->
-    <!-- МОБИЛЬНОЕ МЕНЮ (ИСПРАВЛЕНО - РАБОТАЕТ!) -->
+    <!-- МОБИЛЬНОЕ МЕНЮ -->
     <!-- ========================================= -->
     <div class="mobile-nav" id="mobileNav">
         <div class="profile-section">
@@ -657,7 +793,6 @@
                 <div class="chat-subtitle" id="currentChatSubtitle">0 онлайн</div>
             </div>
             <div class="chat-actions">
-                <!-- КНОПКА ТЕМЫ В ХЕДЕРЕ (РЯДОМ С КОПИРОВАНИЕМ) -->
                 <button class="action-btn" id="themeToggle" title="Сменить тему">🌙</button>
                 <button class="action-btn" id="copyCurrentIdBtn" title="Копировать мой ID">📋</button>
             </div>
@@ -672,7 +807,15 @@
             </div>
         </div>
 
-        <!-- ПАНЕЛЬ ВВОДА БЕЗ СКРЕПКИ -->
+        <!-- ПАНЕЛЬ ОТВЕТА (скрыта по умолчанию) -->
+        <div class="reply-panel" id="replyPanel" style="display: none;">
+            <div class="reply-info" id="replyInfo">
+                <span>↩️</span> Ответ на сообщение
+            </div>
+            <button class="cancel-reply" id="cancelReplyBtn">✕</button>
+        </div>
+
+        <!-- ПАНЕЛЬ ВВОДА -->
         <div class="input-panel">
             <div class="message-field">
                 <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
@@ -688,7 +831,7 @@
 
     <script>
         // =============================================
-        // FIREBASE КОНФИГ (ВАШ РАБОЧИЙ)
+        // FIREBASE КОНФИГ
         // =============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBuJoMVcS2wLS4PWc8wwsQl3ssf_hY-OyU",
@@ -722,6 +865,9 @@
         };
 
         let activeListeners = [];
+        
+        // ПЕРЕМЕННЫЕ ДЛЯ ОТВЕТОВ
+        let replyingTo = null; // { id, username, text }
 
         // =============================================
         // DOM ЭЛЕМЕНТЫ
@@ -754,7 +900,11 @@
             messageInput: document.getElementById('messageInput'),
             sendBtn: document.getElementById('sendBtn'),
             notification: document.getElementById('notification'),
-            notificationText: document.getElementById('notification-text')
+            notificationText: document.getElementById('notification-text'),
+            // Элементы для ответов
+            replyPanel: document.getElementById('replyPanel'),
+            replyInfo: document.getElementById('replyInfo'),
+            cancelReplyBtn: document.getElementById('cancelReplyBtn')
         };
 
         // =============================================
@@ -848,7 +998,6 @@
             elements.navName.textContent = currentUserProfile.username;
             elements.navAvatar.src = currentUserProfile.avatarUrl;
             
-            // ПОКАЗЫВАЕМ НАСТОЯЩИЙ UID
             const shortId = currentUser.uid.substring(0, 8) + '...';
             elements.navId.innerHTML = `ID: <span style="font-family: monospace;">${shortId}</span>`;
             elements.navId.title = `Полный ID: ${currentUser.uid} (нажмите для копирования)`;
@@ -865,7 +1014,6 @@
             navigator.clipboard.writeText(currentUser.uid).then(() => {
                 showNotification('📋 ID скопирован в буфер обмена!');
             }).catch(() => {
-                // Fallback для старых браузеров
                 const textarea = document.createElement('textarea');
                 textarea.value = currentUser.uid;
                 document.body.appendChild(textarea);
@@ -877,7 +1025,7 @@
         }
 
         // =============================================
-        // МОБИЛЬНОЕ МЕНЮ (ИСПРАВЛЕНО - РАБОТАЕТ!)
+        // МОБИЛЬНОЕ МЕНЮ
         // =============================================
         function toggleMobileNav() {
             elements.mobileNav.classList.toggle('active');
@@ -887,6 +1035,368 @@
         function closeMobileNav() {
             elements.mobileNav.classList.remove('active');
             elements.navOverlay.classList.remove('active');
+        }
+
+        // =============================================
+        // ФУНКЦИИ ДЛЯ ОТВЕТОВ
+        // =============================================
+        
+        // Начать ответ на сообщение
+        function startReply(messageId, username, text) {
+            replyingTo = {
+                id: messageId,
+                username: username,
+                text: text.substring(0, 50) + (text.length > 50 ? '...' : '')
+            };
+            
+            elements.replyInfo.innerHTML = `
+                <span>↩️</span> 
+                <strong>${escapeHtml(username)}</strong>: ${escapeHtml(replyingTo.text)}
+            `;
+            elements.replyPanel.style.display = 'flex';
+            elements.messageInput.focus();
+            
+            showNotification(`↩️ Ответ на сообщение от ${username}`, 'info');
+        }
+
+        // Отменить ответ
+        function cancelReply() {
+            replyingTo = null;
+            elements.replyPanel.style.display = 'none';
+        }
+
+        // =============================================
+        // УДАЛЕНИЕ СООБЩЕНИЯ
+        // =============================================
+        async function deleteMessage(messageId) {
+            if (!confirm('Удалить это сообщение?')) return;
+            
+            try {
+                let path = '';
+                if (currentChat.type === 'general') {
+                    path = `messages/${messageId}`;
+                } else if (currentChat.type === 'private') {
+                    path = `private_messages/${currentChat.id}/${messageId}`;
+                } else if (currentChat.type === 'group') {
+                    path = `group_messages/${currentChat.id}/${messageId}`;
+                }
+                
+                // Вместо удаления - помечаем как удаленное
+                await db.ref(path).update({
+                    text: '🚫 Сообщение удалено',
+                    deleted: true,
+                    deletedAt: Date.now()
+                });
+                
+                showNotification('✅ Сообщение удалено');
+                
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                showNotification('❌ Ошибка удаления', 'error');
+            }
+        }
+
+        // =============================================
+        // ОТПРАВКА СООБЩЕНИЯ (С ПОДДЕРЖКОЙ ОТВЕТОВ)
+        // =============================================
+        async function sendMessage() {
+            const text = elements.messageInput.value.trim();
+            
+            if (!text || !currentUser) {
+                return;
+            }
+            
+            const messageData = {
+                text: text,
+                userId: currentUser.uid,
+                username: currentUserProfile.username,
+                avatarUrl: currentUserProfile.avatarUrl,
+                timestamp: {
+                    seconds: Math.floor(Date.now() / 1000),
+                    nanoseconds: 0
+                }
+            };
+            
+            // Добавляем информацию об ответе, если есть
+            if (replyingTo) {
+                messageData.replyTo = replyingTo.id;
+                messageData.replyToUsername = replyingTo.username;
+                messageData.replyToText = replyingTo.text;
+            }
+            
+            try {
+                if (currentChat.type === 'general') {
+                    await db.ref('messages').push(messageData);
+                } else if (currentChat.type === 'private' && currentChat.id) {
+                    await db.ref(`private_messages/${currentChat.id}`).push(messageData);
+                    
+                    await db.ref(`private_chats/${currentChat.id}/lastMessage`).set({
+                        text: text,
+                        timestamp: messageData.timestamp.seconds,
+                        senderId: currentUser.uid,
+                        senderName: currentUserProfile.username
+                    });
+                } else if (currentChat.type === 'group' && currentChat.id) {
+                    await db.ref(`group_messages/${currentChat.id}`).push(messageData);
+                    
+                    await db.ref(`groups/${currentChat.id}/lastMessage`).set({
+                        text: text,
+                        timestamp: messageData.timestamp.seconds,
+                        senderId: currentUser.uid,
+                        senderName: currentUserProfile.username
+                    });
+                }
+                
+                elements.messageInput.value = '';
+                elements.messageInput.style.height = 'auto';
+                elements.sendBtn.disabled = true;
+                
+                // Сбрасываем ответ
+                cancelReply();
+                
+            } catch (error) {
+                console.error('Ошибка отправки:', error);
+                showNotification('❌ Ошибка отправки', 'error');
+            }
+        }
+
+        // =============================================
+        // СОЗДАНИЕ ЭЛЕМЕНТА СООБЩЕНИЯ (С КНОПКАМИ)
+        // =============================================
+        function createMessageElement(message) {
+            const isMyMessage = currentUser && message.userId === currentUser.uid;
+            const isDeleted = message.deleted === true;
+            
+            const div = document.createElement('div');
+            div.className = `message ${isMyMessage ? 'my-message' : ''}`;
+            div.setAttribute('data-message-id', message.id);
+            
+            let timeText = '';
+            if (message.timestamp?.seconds) {
+                const date = new Date(message.timestamp.seconds * 1000);
+                timeText = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            const avatarUrl = message.avatarUrl || 'https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200';
+            const username = message.username || 'Неизвестный';
+            let text = message.text || '';
+            
+            // Блок ответа (цитата)
+            let replyBlock = '';
+            if (message.replyTo) {
+                const replyUsername = message.replyToUsername || 'Пользователь';
+                const replyText = message.replyToText || '';
+                replyBlock = `
+                    <div class="reply-block">
+                        <span class="reply-author">↩️ ${escapeHtml(replyUsername)}</span>
+                        <span class="reply-text">${escapeHtml(replyText)}</span>
+                    </div>
+                `;
+            }
+            
+            // Кнопки действий (только для не удаленных сообщений)
+            let actionButtons = '';
+            if (!isDeleted) {
+                actionButtons = `
+                    <div class="message-actions">
+                        <button class="message-action-btn reply" onclick="window.startReply('${message.id}', '${escapeHtml(username)}', '${escapeHtml(text.replace(/'/g, "\\'"))}')" title="Ответить">↩️</button>
+                        ${isMyMessage ? `<button class="message-action-btn delete" onclick="window.deleteMessage('${message.id}')" title="Удалить">🗑️</button>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Текст сообщения (с пометкой удалено)
+            let messageText = '';
+            if (isDeleted) {
+                messageText = `<div class="message-text deleted">🚫 Сообщение удалено</div>`;
+            } else {
+                messageText = `<div class="message-text">${escapeHtml(text)}</div>`;
+            }
+            
+            div.innerHTML = `
+                <img src="${escapeHtml(avatarUrl)}" class="message-avatar" alt="Avatar">
+                <div class="message-content">
+                    ${actionButtons}
+                    <div class="message-bubble">
+                        <div class="message-header">
+                            <div class="message-username">${escapeHtml(username)}</div>
+                            <div class="message-time">${timeText}</div>
+                        </div>
+                        ${replyBlock}
+                        ${messageText}
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        // =============================================
+        // ОТОБРАЖЕНИЕ СООБЩЕНИЙ
+        // =============================================
+        function renderMessages(messages) {
+            elements.messagesContainer.innerHTML = '';
+            
+            if (!messages || messages.length === 0) {
+                elements.emptyChat.style.display = 'block';
+                return;
+            }
+            
+            elements.emptyChat.style.display = 'none';
+            
+            messages.sort((a, b) => {
+                const timeA = a.timestamp?.seconds || 0;
+                const timeB = b.timestamp?.seconds || 0;
+                return timeA - timeB;
+            });
+            
+            messages.forEach(message => {
+                const messageEl = createMessageElement(message);
+                elements.messagesContainer.appendChild(messageEl);
+            });
+            
+            scrollToBottom();
+        }
+
+        // =============================================
+        // ЗАГРУЗКА ОБЩИХ СООБЩЕНИЙ
+        // =============================================
+        function loadGeneralMessages() {
+            elements.loadingMessages.style.display = 'block';
+            
+            const messagesRef = db.ref('messages');
+            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                elements.loadingMessages.style.display = 'none';
+                
+                const messages = [];
+                snapshot.forEach((child) => {
+                    if (child.key !== 'welcome') {
+                        messages.push({
+                            id: child.key,
+                            ...child.val()
+                        });
+                    }
+                });
+                
+                renderMessages(messages);
+            });
+            
+            activeListeners.push({ ref: messagesRef, listener });
+        }
+
+        // =============================================
+        // ЗАГРУЗКА ПРИВАТНЫХ СООБЩЕНИЙ
+        // =============================================
+        function loadPrivateMessages(chatId) {
+            elements.loadingMessages.style.display = 'block';
+            
+            const messagesRef = db.ref(`private_messages/${chatId}`);
+            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                elements.loadingMessages.style.display = 'none';
+                
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
+                renderMessages(messages);
+            });
+            
+            activeListeners.push({ ref: messagesRef, listener });
+        }
+
+        // =============================================
+        // ЗАГРУЗКА ГРУППОВЫХ СООБЩЕНИЙ
+        // =============================================
+        function loadGroupMessages(groupId) {
+            elements.loadingMessages.style.display = 'block';
+            
+            const messagesRef = db.ref(`group_messages/${groupId}`);
+            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                elements.loadingMessages.style.display = 'none';
+                
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
+                renderMessages(messages);
+            });
+            
+            activeListeners.push({ ref: messagesRef, listener });
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ПРИВАТНЫЙ ЧАТ
+        // =============================================
+        function switchToPrivateChat(chatId, targetUserId) {
+            removeAllListeners();
+            cancelReply(); // Сбрасываем ответ
+            
+            currentChat = {
+                type: 'private',
+                id: chatId,
+                targetUserId: targetUserId
+            };
+            
+            db.ref(`private_chats/${chatId}/participants/${targetUserId}`).once('value', (snapshot) => {
+                const participant = snapshot.val();
+                const chatName = participant?.username || targetUserId.substring(0, 8);
+                
+                currentChat.name = chatName;
+                elements.currentChatTitle.textContent = chatName;
+                elements.currentChatSubtitle.textContent = 'Личное сообщение';
+                
+                loadPrivateMessages(chatId);
+            });
+            
+            closeMobileNav();
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ГРУППУ
+        // =============================================
+        function switchToGroupChat(groupId, groupName) {
+            removeAllListeners();
+            cancelReply(); // Сбрасываем ответ
+            
+            currentChat = {
+                type: 'group',
+                id: groupId,
+                name: groupName
+            };
+            
+            elements.currentChatTitle.textContent = groupName;
+            elements.currentChatSubtitle.textContent = 'Групповой чат';
+            
+            loadGroupMessages(groupId);
+            closeMobileNav();
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ОБЩИЙ ЧАТ
+        // =============================================
+        function switchToGeneralChat() {
+            removeAllListeners();
+            cancelReply(); // Сбрасываем ответ
+            
+            currentChat = {
+                type: 'general',
+                id: null,
+                name: 'Общий чат'
+            };
+            
+            elements.currentChatTitle.textContent = 'Общий чат';
+            elements.currentChatSubtitle.textContent = '0 онлайн';
+            
+            loadGeneralMessages();
+            closeMobileNav();
         }
 
         // =============================================
@@ -945,198 +1455,6 @@
             } catch (error) {
                 console.error('Ошибка создания чата:', error);
                 showNotification('❌ Ошибка создания чата', 'error');
-            }
-        }
-
-        // =============================================
-        // ПЕРЕКЛЮЧЕНИЕ НА ПРИВАТНЫЙ ЧАТ
-        // =============================================
-        function switchToPrivateChat(chatId, targetUserId) {
-            removeAllListeners();
-            
-            currentChat = {
-                type: 'private',
-                id: chatId,
-                targetUserId: targetUserId
-            };
-            
-            db.ref(`private_chats/${chatId}/participants/${targetUserId}`).once('value', (snapshot) => {
-                const participant = snapshot.val();
-                const chatName = participant?.username || targetUserId.substring(0, 8);
-                
-                currentChat.name = chatName;
-                elements.currentChatTitle.textContent = chatName;
-                elements.currentChatSubtitle.textContent = 'Личное сообщение';
-                
-                loadPrivateMessages(chatId);
-            });
-            
-            closeMobileNav();
-        }
-
-        // =============================================
-        // ЗАГРУЗКА ПРИВАТНЫХ СООБЩЕНИЙ
-        // =============================================
-        function loadPrivateMessages(chatId) {
-            elements.loadingMessages.style.display = 'block';
-            
-            const messagesRef = db.ref(`private_messages/${chatId}`);
-            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
-                elements.loadingMessages.style.display = 'none';
-                
-                const messages = [];
-                snapshot.forEach((child) => {
-                    messages.push({
-                        id: child.key,
-                        ...child.val()
-                    });
-                });
-                
-                renderMessages(messages);
-            });
-            
-            activeListeners.push({ ref: messagesRef, listener });
-        }
-
-        // =============================================
-        // ЗАГРУЗКА ОБЩИХ СООБЩЕНИЙ
-        // =============================================
-        function loadGeneralMessages() {
-            elements.loadingMessages.style.display = 'block';
-            
-            const messagesRef = db.ref('messages');
-            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
-                elements.loadingMessages.style.display = 'none';
-                
-                const messages = [];
-                snapshot.forEach((child) => {
-                    if (child.key !== 'welcome') {
-                        messages.push({
-                            id: child.key,
-                            ...child.val()
-                        });
-                    }
-                });
-                
-                renderMessages(messages);
-            });
-            
-            activeListeners.push({ ref: messagesRef, listener });
-        }
-
-        // =============================================
-        // ОТОБРАЖЕНИЕ СООБЩЕНИЙ
-        // =============================================
-        function renderMessages(messages) {
-            elements.messagesContainer.innerHTML = '';
-            
-            if (!messages || messages.length === 0) {
-                elements.emptyChat.style.display = 'block';
-                return;
-            }
-            
-            elements.emptyChat.style.display = 'none';
-            
-            messages.sort((a, b) => {
-                const timeA = a.timestamp?.seconds || 0;
-                const timeB = b.timestamp?.seconds || 0;
-                return timeA - timeB;
-            });
-            
-            messages.forEach(message => {
-                const messageEl = createMessageElement(message);
-                elements.messagesContainer.appendChild(messageEl);
-            });
-            
-            scrollToBottom();
-        }
-
-        // =============================================
-        // СОЗДАНИЕ ЭЛЕМЕНТА СООБЩЕНИЯ
-        // =============================================
-        function createMessageElement(message) {
-            const isMyMessage = currentUser && message.userId === currentUser.uid;
-            
-            const div = document.createElement('div');
-            div.className = `message ${isMyMessage ? 'my-message' : ''}`;
-            
-            let timeText = '';
-            if (message.timestamp?.seconds) {
-                const date = new Date(message.timestamp.seconds * 1000);
-                timeText = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            }
-            
-            const avatarUrl = message.avatarUrl || 'https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200';
-            const username = message.username || 'Неизвестный';
-            const text = message.text || '';
-            
-            div.innerHTML = `
-                <img src="${escapeHtml(avatarUrl)}" class="message-avatar" alt="Avatar">
-                <div class="message-content">
-                    <div class="message-bubble">
-                        <div class="message-header">
-                            <div class="message-username">${escapeHtml(username)}</div>
-                            <div class="message-time">${timeText}</div>
-                        </div>
-                        <div class="message-text">${escapeHtml(text)}</div>
-                    </div>
-                </div>
-            `;
-            
-            return div;
-        }
-
-        // =============================================
-        // ОТПРАВКА СООБЩЕНИЯ
-        // =============================================
-        async function sendMessage() {
-            const text = elements.messageInput.value.trim();
-            
-            if (!text || !currentUser) {
-                return;
-            }
-            
-            const messageData = {
-                text: text,
-                userId: currentUser.uid,
-                username: currentUserProfile.username,
-                avatarUrl: currentUserProfile.avatarUrl,
-                timestamp: {
-                    seconds: Math.floor(Date.now() / 1000),
-                    nanoseconds: 0
-                }
-            };
-            
-            try {
-                if (currentChat.type === 'general') {
-                    await db.ref('messages').push(messageData);
-                } else if (currentChat.type === 'private' && currentChat.id) {
-                    await db.ref(`private_messages/${currentChat.id}`).push(messageData);
-                    
-                    await db.ref(`private_chats/${currentChat.id}/lastMessage`).set({
-                        text: text,
-                        timestamp: messageData.timestamp.seconds,
-                        senderId: currentUser.uid,
-                        senderName: currentUserProfile.username
-                    });
-                } else if (currentChat.type === 'group' && currentChat.id) {
-                    await db.ref(`group_messages/${currentChat.id}`).push(messageData);
-                    
-                    await db.ref(`groups/${currentChat.id}/lastMessage`).set({
-                        text: text,
-                        timestamp: messageData.timestamp.seconds,
-                        senderId: currentUser.uid,
-                        senderName: currentUserProfile.username
-                    });
-                }
-                
-                elements.messageInput.value = '';
-                elements.messageInput.style.height = 'auto';
-                elements.sendBtn.disabled = true;
-                
-            } catch (error) {
-                console.error('Ошибка отправки:', error);
-                showNotification('❌ Ошибка отправки', 'error');
             }
         }
 
@@ -1262,68 +1580,6 @@
             setTimeout(() => {
                 if (div.parentElement) div.remove();
             }, 30000);
-        }
-
-        // =============================================
-        // ПЕРЕКЛЮЧЕНИЕ НА ГРУППУ
-        // =============================================
-        function switchToGroupChat(groupId, groupName) {
-            removeAllListeners();
-            
-            currentChat = {
-                type: 'group',
-                id: groupId,
-                name: groupName
-            };
-            
-            elements.currentChatTitle.textContent = groupName;
-            elements.currentChatSubtitle.textContent = 'Групповой чат';
-            
-            loadGroupMessages(groupId);
-            closeMobileNav();
-        }
-
-        // =============================================
-        // ЗАГРУЗКА ГРУППОВЫХ СООБЩЕНИЙ
-        // =============================================
-        function loadGroupMessages(groupId) {
-            elements.loadingMessages.style.display = 'block';
-            
-            const messagesRef = db.ref(`group_messages/${groupId}`);
-            const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
-                elements.loadingMessages.style.display = 'none';
-                
-                const messages = [];
-                snapshot.forEach((child) => {
-                    messages.push({
-                        id: child.key,
-                        ...child.val()
-                    });
-                });
-                
-                renderMessages(messages);
-            });
-            
-            activeListeners.push({ ref: messagesRef, listener });
-        }
-
-        // =============================================
-        // ПЕРЕКЛЮЧЕНИЕ НА ОБЩИЙ ЧАТ
-        // =============================================
-        function switchToGeneralChat() {
-            removeAllListeners();
-            
-            currentChat = {
-                type: 'general',
-                id: null,
-                name: 'Общий чат'
-            };
-            
-            elements.currentChatTitle.textContent = 'Общий чат';
-            elements.currentChatSubtitle.textContent = '0 онлайн';
-            
-            loadGeneralMessages();
-            closeMobileNav();
         }
 
         // =============================================
@@ -1500,7 +1756,7 @@
         }
 
         // =============================================
-        // ТЕМА (КНОПКА В ХЕДЕРЕ!)
+        // ТЕМА
         // =============================================
         function initTheme() {
             const saved = localStorage.getItem('chat-theme-original');
@@ -1553,7 +1809,7 @@
         // НАСТРОЙКА ОБРАБОТЧИКОВ
         // =============================================
         function setupEventListeners() {
-            // Мобильное меню - РАБОТАЕТ!
+            // Мобильное меню
             elements.menuBtn.addEventListener('click', toggleMobileNav);
             elements.navOverlay.addEventListener('click', closeMobileNav);
             
@@ -1591,8 +1847,11 @@
                 elements.sendBtn.disabled = !this.value.trim();
             });
             
-            // Тема (кнопка в хедере)
+            // Тема
             elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // Отмена ответа
+            elements.cancelReplyBtn.addEventListener('click', cancelReply);
             
             // Enter в полях
             elements.privateUserId.addEventListener('keypress', (e) => {
@@ -1619,6 +1878,8 @@
         window.switchToGroupChat = switchToGroupChat;
         window.switchToGeneralChat = switchToGeneralChat;
         window.copyUserId = copyUserId;
+        window.deleteMessage = deleteMessage;
+        window.startReply = startReply;
 
         // =============================================
         // СТАРТ
