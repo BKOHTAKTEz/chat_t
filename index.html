@@ -6,7 +6,7 @@
     <title>Общий чат - Личные сообщения - Группы</title>
     <style>
         /* =============================================
-           ВОЗВРАЩАЕМ ОРИГИНАЛЬНЫЕ ЦВЕТА ИЗ НАЧАЛЬНОГО КОДА
+           ОРИГИНАЛЬНЫЕ ЦВЕТА ИЗ НАЧАЛЬНОГО КОДА
            ============================================= */
         :root {
             --primary: #4a76a8;
@@ -56,7 +56,7 @@
         }
         
         /* =============================================
-           ИСПРАВЛЕННОЕ МОБИЛЬНОЕ МЕНЮ (ТЕПЕРЬ РАБОТАЕТ!)
+           ИСПРАВЛЕННОЕ МОБИЛЬНОЕ МЕНЮ (РАБОТАЕТ!)
            ============================================= */
         .mobile-nav {
             position: fixed;
@@ -248,7 +248,7 @@
         }
         
         /* =============================================
-           ПАНЕЛЬ ВВОДА (УБРАЛИ СКРЕПКУ!)
+           ПАНЕЛЬ ВВОДА (БЕЗ СКРЕПКИ!)
            ============================================= */
         .input-panel {
             background: var(--light);
@@ -415,11 +415,6 @@
             text-overflow: ellipsis;
         }
         
-        .chat-list-badge {
-            font-size: 12px;
-            color: var(--primary);
-        }
-        
         .create-chat-form {
             background: rgba(74, 118, 168, 0.05);
             border-radius: 12px;
@@ -472,6 +467,9 @@
             background: var(--group);
         }
         
+        /* =============================================
+           КОД ПРИГЛАШЕНИЯ
+           ============================================= */
         .invite-code-display {
             position: fixed;
             bottom: 24px;
@@ -557,12 +555,12 @@
         .notification.group { background: var(--group); }
         
         /* =============================================
-           ТЕМА
+           КНОПКА ТЕМЫ - ПЕРЕМЕЩЕНА В ПРАВЫЙ НИЖНИЙ УГОЛ!
            ============================================= */
         .theme-toggle {
             position: fixed;
             bottom: 20px;
-            left: 20px;
+            right: 20px;
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -576,11 +574,18 @@
             font-size: 1.2rem;
             z-index: 2002;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.9);
+            background: var(--secondary);
         }
         
         @media (min-width: 768px) {
             .theme-toggle {
-                left: 400px;
+                bottom: 20px;
+                right: 20px;
             }
         }
         
@@ -609,7 +614,7 @@
 </head>
 <body>
     <!-- ========================================= -->
-    <!-- МОБИЛЬНОЕ МЕНЮ (ИСПРАВЛЕНО - ТЕПЕРЬ РАБОТАЕТ!) -->
+    <!-- МОБИЛЬНОЕ МЕНЮ (ИСПРАВЛЕНО - РАБОТАЕТ!) -->
     <!-- ========================================= -->
     <div class="mobile-nav" id="mobileNav">
         <div class="profile-section">
@@ -694,7 +699,7 @@
             </div>
         </div>
 
-        <!-- УБРАЛИ СКРЕПКУ! -->
+        <!-- ПАНЕЛЬ ВВОДА БЕЗ СКРЕПКИ -->
         <div class="input-panel">
             <div class="message-field">
                 <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
@@ -708,6 +713,7 @@
         <span id="notification-text"></span>
     </div>
 
+    <!-- КНОПКА ТЕМЫ В ПРАВОМ НИЖНЕМ УГЛУ -->
     <button class="theme-toggle" id="themeToggle">🌙</button>
 
     <script>
@@ -872,7 +878,7 @@
             elements.navName.textContent = currentUserProfile.username;
             elements.navAvatar.src = currentUserProfile.avatarUrl;
             
-            // ПОКАЗЫВАЕМ НАСТОЯЩИЙ UID!
+            // ПОКАЗЫВАЕМ НАСТОЯЩИЙ UID
             const shortId = currentUser.uid.substring(0, 8) + '...';
             elements.navId.innerHTML = `ID: <span style="font-family: monospace;">${shortId}</span>`;
             elements.navId.title = `Полный ID: ${currentUser.uid} (нажмите для копирования)`;
@@ -881,7 +887,7 @@
         }
 
         // =============================================
-        // КОПИРОВАНИЕ ID (ИСПРАВЛЕНО!)
+        // КОПИРОВАНИЕ ID
         // =============================================
         function copyUserId() {
             if (!currentUser) return;
@@ -1354,6 +1360,8 @@
         // ЗАГРУЗКА ПРИВАТНЫХ ЧАТОВ
         // =============================================
         function loadPrivateChats() {
+            if (!currentUser) return;
+            
             db.ref('private_chats').on('value', (snapshot) => {
                 const chats = [];
                 
@@ -1421,6 +1429,8 @@
         // ЗАГРУЗКА ГРУПП
         // =============================================
         function loadUserGroups() {
+            if (!currentUser) return;
+            
             db.ref('groups').on('value', (snapshot) => {
                 const groups = [];
                 
@@ -1573,7 +1583,7 @@
         // НАСТРОЙКА ОБРАБОТЧИКОВ
         // =============================================
         function setupEventListeners() {
-            // Мобильное меню - ИСПРАВЛЕНО!
+            // Мобильное меню - РАБОТАЕТ!
             elements.menuBtn.addEventListener('click', toggleMobileNav);
             elements.navOverlay.addEventListener('click', closeMobileNav);
             
