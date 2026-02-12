@@ -163,6 +163,12 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover, .action-btn:active {
+            background: rgba(255,255,255,0.3);
+            transform: scale(0.95);
         }
         
         /* =============================================
@@ -554,41 +560,6 @@
         .notification.private { background: var(--private); }
         .notification.group { background: var(--group); }
         
-        /* =============================================
-           КНОПКА ТЕМЫ - ПЕРЕМЕЩЕНА В ПРАВЫЙ НИЖНИЙ УГОЛ!
-           ============================================= */
-        .theme-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            z-index: 2002;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-        }
-        
-        .theme-toggle:active {
-            transform: scale(0.9);
-            background: var(--secondary);
-        }
-        
-        @media (min-width: 768px) {
-            .theme-toggle {
-                bottom: 20px;
-                right: 20px;
-            }
-        }
-        
         .loading {
             text-align: center;
             padding: 30px;
@@ -686,6 +657,8 @@
                 <div class="chat-subtitle" id="currentChatSubtitle">0 онлайн</div>
             </div>
             <div class="chat-actions">
+                <!-- КНОПКА ТЕМЫ В ХЕДЕРЕ (РЯДОМ С КОПИРОВАНИЕМ) -->
+                <button class="action-btn" id="themeToggle" title="Сменить тему">🌙</button>
                 <button class="action-btn" id="copyCurrentIdBtn" title="Копировать мой ID">📋</button>
             </div>
         </div>
@@ -712,9 +685,6 @@
     <div class="notification" id="notification">
         <span id="notification-text"></span>
     </div>
-
-    <!-- КНОПКА ТЕМЫ В ПРАВОМ НИЖНЕМ УГЛУ -->
-    <button class="theme-toggle" id="themeToggle">🌙</button>
 
     <script>
         // =============================================
@@ -777,12 +747,12 @@
             currentChatTitle: document.getElementById('currentChatTitle'),
             currentChatSubtitle: document.getElementById('currentChatSubtitle'),
             copyCurrentIdBtn: document.getElementById('copyCurrentIdBtn'),
+            themeToggle: document.getElementById('themeToggle'),
             messagesContainer: document.getElementById('messagesContainer'),
             loadingMessages: document.getElementById('loadingMessages'),
             emptyChat: document.getElementById('emptyChat'),
             messageInput: document.getElementById('messageInput'),
             sendBtn: document.getElementById('sendBtn'),
-            themeToggle: document.getElementById('themeToggle'),
             notification: document.getElementById('notification'),
             notificationText: document.getElementById('notification-text')
         };
@@ -1530,7 +1500,7 @@
         }
 
         // =============================================
-        // ТЕМА
+        // ТЕМА (КНОПКА В ХЕДЕРЕ!)
         // =============================================
         function initTheme() {
             const saved = localStorage.getItem('chat-theme-original');
@@ -1621,7 +1591,7 @@
                 elements.sendBtn.disabled = !this.value.trim();
             });
             
-            // Тема
+            // Тема (кнопка в хедере)
             elements.themeToggle.addEventListener('click', toggleTheme);
             
             // Enter в полях
