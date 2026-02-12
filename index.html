@@ -49,14 +49,32 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        /* =============================================
+           ИСПРАВЛЕНИЕ ДЛЯ МОБИЛЬНЫХ БРАУЗЕРОВ!
+           ============================================= */
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
         body {
             background-color: var(--bg-color);
             color: var(--dark);
             line-height: 1.6;
+        }
+        
+        #app {
+            display: flex;
             height: 100vh;
-            overflow: hidden;
-            position: fixed;
+            height: -webkit-fill-available;
             width: 100%;
+            position: relative;
         }
         
         /* =============================================
@@ -69,6 +87,7 @@
             width: 85%;
             max-width: 360px;
             height: 100vh;
+            height: -webkit-fill-available;
             background: var(--sidebar-bg);
             z-index: 1000;
             transition: left 0.3s ease;
@@ -101,13 +120,16 @@
         }
 
         /* =============================================
-           ОСНОВНОЙ ЧАТ
+           ОСНОВНОЙ ЧАТ - ИСПРАВЛЕНО ДЛЯ МОБИЛЬНЫХ!
            ============================================= */
         .chat-view {
             display: flex;
             flex-direction: column;
             height: 100vh;
+            height: -webkit-fill-available;
+            width: 100%;
             background: var(--light);
+            position: relative;
         }
         
         .chat-header {
@@ -118,6 +140,8 @@
             align-items: center;
             gap: 12px;
             flex-shrink: 0;
+            position: relative;
+            z-index: 10;
         }
         
         .menu-btn {
@@ -168,6 +192,7 @@
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         
         .action-btn:hover, .action-btn:active {
@@ -176,16 +201,17 @@
         }
         
         /* =============================================
-           СООБЩЕНИЯ С КНОПКАМИ ДЕЙСТВИЙ
+           СООБЩЕНИЯ
            ============================================= */
         .messages-container {
-            flex: 1;
+            flex: 1 1 auto;
             overflow-y: auto;
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 12px;
             background: var(--bg-color);
+            -webkit-overflow-scrolling: touch;
         }
         
         .message {
@@ -259,13 +285,11 @@
             word-break: break-word;
         }
         
-        /* УДАЛЕННОЕ СООБЩЕНИЕ */
         .message-text.deleted {
             color: var(--deleted-color);
             font-style: italic;
         }
         
-        /* БЛОК ОТВЕТА */
         .reply-block {
             background: rgba(0,0,0,0.05);
             border-left: 3px solid var(--primary);
@@ -289,7 +313,6 @@
             word-break: break-word;
         }
         
-        /* КНОПКИ ДЕЙСТВИЙ НАД СООБЩЕНИЕМ */
         .message-actions {
             position: absolute;
             top: -10px;
@@ -312,6 +335,13 @@
         
         .message:hover .message-actions {
             opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .message-actions {
+                opacity: 1;
+                top: -5px;
+            }
         }
         
         .message-action-btn {
@@ -341,7 +371,9 @@
             color: var(--primary);
         }
         
-        /* ПАНЕЛЬ ОТВЕТА */
+        /* =============================================
+           ПАНЕЛЬ ОТВЕТА - ИСПРАВЛЕНО!
+           ============================================= */
         .reply-panel {
             background: var(--light);
             border-top: 1px solid var(--border);
@@ -349,6 +381,9 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 20;
         }
         
         .reply-info {
@@ -360,6 +395,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            word-break: break-word;
         }
         
         .reply-info span {
@@ -379,10 +415,11 @@
             color: var(--gray);
             font-size: 18px;
             cursor: pointer;
+            flex-shrink: 0;
         }
         
         /* =============================================
-           ПАНЕЛЬ ВВОДА
+           ПАНЕЛЬ ВВОДА - ИСПРАВЛЕНО ДЛЯ МОБИЛЬНЫХ!
            ============================================= */
         .input-panel {
             background: var(--light);
@@ -392,6 +429,10 @@
             gap: 12px;
             border-top: 1px solid var(--border);
             flex-shrink: 0;
+            position: relative;
+            z-index: 30;
+            /* Для безопасной зоны на iPhone */
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
         
         .message-field {
@@ -412,7 +453,7 @@
             background: transparent;
             border: none;
             color: var(--dark);
-            font-size: 15px;
+            font-size: 16px; /* Увеличено для мобильных */
             line-height: 1.5;
             max-height: 120px;
             resize: none;
@@ -601,9 +642,6 @@
             background: var(--group);
         }
         
-        /* =============================================
-           КОД ПРИГЛАШЕНИЯ
-           ============================================= */
         .invite-code-display {
             position: fixed;
             bottom: 24px;
@@ -617,6 +655,8 @@
             z-index: 2000;
             animation: slideUp 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            /* Для безопасной зоны на iPhone */
+            bottom: max(24px, env(safe-area-inset-bottom));
         }
         
         .invite-code {
@@ -624,6 +664,7 @@
             font-weight: bold;
             letter-spacing: 8px;
             margin: 16px 0;
+            word-break: break-word;
         }
         
         @keyframes slideUp {
@@ -635,11 +676,22 @@
            ПК ВЕРСИЯ
            ============================================= */
         @media (min-width: 768px) {
+            #app {
+                flex-direction: row;
+                max-width: 1400px;
+                margin: 0 auto;
+                height: 90vh;
+                margin-top: 5vh;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            }
+            
             .mobile-nav {
                 left: 0;
                 position: relative;
                 width: 360px;
-                height: 100vh;
+                height: 100%;
                 box-shadow: 2px 0 8px rgba(0,0,0,0.1);
             }
             
@@ -653,10 +705,15 @@
             
             body {
                 display: flex;
+                align-items: center;
+                justify-content: center;
+                position: static;
+                overflow: auto;
             }
             
             .chat-view {
                 flex: 1;
+                height: 100%;
             }
             
             .message-actions {
@@ -684,6 +741,9 @@
             z-index: 2001;
             max-width: 300px;
             animation: slideIn 0.3s ease;
+            /* Для безопасной зоны на iPhone */
+            bottom: max(20px, env(safe-area-inset-bottom));
+            right: max(20px, env(safe-area-inset-right));
         }
         
         @keyframes slideIn {
@@ -720,107 +780,109 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
-    <!-- ========================================= -->
-    <!-- МОБИЛЬНОЕ МЕНЮ -->
-    <!-- ========================================= -->
-    <div class="mobile-nav" id="mobileNav">
-        <div class="profile-section">
-            <img src="https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200" 
-                 alt="Avatar" class="profile-avatar-large" id="navAvatar">
-            <div class="profile-name-large" id="navName">Загрузка...</div>
-            <div class="profile-id-large" id="navId">ID: ...</div>
-        </div>
+    <div id="app">
+        <!-- ========================================= -->
+        <!-- МОБИЛЬНОЕ МЕНЮ -->
+        <!-- ========================================= -->
+        <div class="mobile-nav" id="mobileNav">
+            <div class="profile-section">
+                <img src="https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200" 
+                     alt="Avatar" class="profile-avatar-large" id="navAvatar">
+                <div class="profile-name-large" id="navName">Загрузка...</div>
+                <div class="profile-id-large" id="navId">ID: ...</div>
+            </div>
 
-        <div class="menu-section">
-            <div class="menu-section-title">👤 Мой профиль</div>
-            <div class="create-chat-form">
-                <input type="text" id="navUsername" class="form-input" placeholder="Ваше имя">
-                <button class="form-button success" id="saveProfileBtn">Сохранить имя</button>
+            <div class="menu-section">
+                <div class="menu-section-title">👤 Мой профиль</div>
+                <div class="create-chat-form">
+                    <input type="text" id="navUsername" class="form-input" placeholder="Ваше имя">
+                    <button class="form-button success" id="saveProfileBtn">Сохранить имя</button>
+                </div>
             </div>
-        </div>
 
-        <div class="menu-section">
-            <div class="menu-section-title">💌 Личные сообщения</div>
-            <div class="create-chat-form">
-                <input type="text" id="privateUserId" class="form-input" placeholder="Введите ID пользователя">
-                <button class="form-button private" id="createPrivateChatBtn">Написать лично</button>
+            <div class="menu-section">
+                <div class="menu-section-title">💌 Личные сообщения</div>
+                <div class="create-chat-form">
+                    <input type="text" id="privateUserId" class="form-input" placeholder="Введите ID пользователя">
+                    <button class="form-button private" id="createPrivateChatBtn">Написать лично</button>
+                </div>
+                <div class="chat-list" id="privateChatsList">
+                    <div style="color: var(--gray); padding: 12px;">Загрузка...</div>
+                </div>
             </div>
-            <div class="chat-list" id="privateChatsList">
-                <div style="color: var(--gray); padding: 12px;">Загрузка...</div>
-            </div>
-        </div>
 
-        <div class="menu-section">
-            <div class="menu-section-title">👥 Группы</div>
-            <div class="create-chat-form">
-                <input type="text" id="groupNameInput" class="form-input" placeholder="Название группы">
-                <button class="form-button group" id="createGroupBtn">Создать группу</button>
+            <div class="menu-section">
+                <div class="menu-section-title">👥 Группы</div>
+                <div class="create-chat-form">
+                    <input type="text" id="groupNameInput" class="form-input" placeholder="Название группы">
+                    <button class="form-button group" id="createGroupBtn">Создать группу</button>
+                </div>
+                <div style="margin: 16px 0; text-align: center; color: var(--gray);">— или —</div>
+                <div class="create-chat-form">
+                    <input type="text" id="inviteCodeInput" class="form-input" placeholder="Код приглашения">
+                    <button class="form-button success" id="joinGroupBtn">Присоединиться</button>
+                </div>
+                <div class="chat-list" id="groupsList">
+                    <div style="color: var(--gray); padding: 12px;">Загрузка...</div>
+                </div>
             </div>
-            <div style="margin: 16px 0; text-align: center; color: var(--gray);">— или —</div>
-            <div class="create-chat-form">
-                <input type="text" id="inviteCodeInput" class="form-input" placeholder="Код приглашения">
-                <button class="form-button success" id="joinGroupBtn">Присоединиться</button>
-            </div>
-            <div class="chat-list" id="groupsList">
-                <div style="color: var(--gray); padding: 12px;">Загрузка...</div>
-            </div>
-        </div>
 
-        <div class="menu-section">
-            <div class="menu-section-title">🏠 Общий чат</div>
-            <div class="chat-list">
-                <div class="chat-list-item" id="generalChatBtn">
-                    <img src="https://ui-avatars.com/api/?name=Global&background=4a76a8&color=fff&size=200" 
-                         class="chat-list-avatar" alt="Global">
-                    <div class="chat-list-info">
-                        <div class="chat-list-name">Общий чат</div>
-                        <div class="chat-list-preview">Все пользователи онлайн</div>
+            <div class="menu-section">
+                <div class="menu-section-title">🏠 Общий чат</div>
+                <div class="chat-list">
+                    <div class="chat-list-item" id="generalChatBtn">
+                        <img src="https://ui-avatars.com/api/?name=Global&background=4a76a8&color=fff&size=200" 
+                             class="chat-list-avatar" alt="Global">
+                        <div class="chat-list-info">
+                            <div class="chat-list-name">Общий чат</div>
+                            <div class="chat-list-preview">Все пользователи онлайн</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="mobile-nav-overlay" id="navOverlay"></div>
+        <div class="mobile-nav-overlay" id="navOverlay"></div>
 
-    <!-- ========================================= -->
-    <!-- ОСНОВНОЙ ЧАТ -->
-    <!-- ========================================= -->
-    <div class="chat-view">
-        <div class="chat-header">
-            <button class="menu-btn" id="menuBtn">☰</button>
-            <div class="chat-info">
-                <div class="chat-title" id="currentChatTitle">Общий чат</div>
-                <div class="chat-subtitle" id="currentChatSubtitle">0 онлайн</div>
+        <!-- ========================================= -->
+        <!-- ОСНОВНОЙ ЧАТ -->
+        <!-- ========================================= -->
+        <div class="chat-view">
+            <div class="chat-header">
+                <button class="menu-btn" id="menuBtn">☰</button>
+                <div class="chat-info">
+                    <div class="chat-title" id="currentChatTitle">Общий чат</div>
+                    <div class="chat-subtitle" id="currentChatSubtitle">0 онлайн</div>
+                </div>
+                <div class="chat-actions">
+                    <button class="action-btn" id="themeToggle" title="Сменить тему">🌙</button>
+                    <button class="action-btn" id="copyCurrentIdBtn" title="Копировать мой ID">📋</button>
+                </div>
             </div>
-            <div class="chat-actions">
-                <button class="action-btn" id="themeToggle" title="Сменить тему">🌙</button>
-                <button class="action-btn" id="copyCurrentIdBtn" title="Копировать мой ID">📋</button>
-            </div>
-        </div>
 
-        <div class="messages-container" id="messagesContainer">
-            <div class="loading" id="loadingMessages">
-                Загрузка сообщений...
+            <div class="messages-container" id="messagesContainer">
+                <div class="loading" id="loadingMessages">
+                    Загрузка сообщений...
+                </div>
+                <div class="empty-chat" id="emptyChat" style="display: none;">
+                    ✨ Чат пуст. Напишите первое сообщение!
+                </div>
             </div>
-            <div class="empty-chat" id="emptyChat" style="display: none;">
-                ✨ Чат пуст. Напишите первое сообщение!
-            </div>
-        </div>
 
-        <!-- ПАНЕЛЬ ОТВЕТА (скрыта по умолчанию) -->
-        <div class="reply-panel" id="replyPanel" style="display: none;">
-            <div class="reply-info" id="replyInfo">
-                <span>↩️</span> Ответ на сообщение
+            <!-- ПАНЕЛЬ ОТВЕТА -->
+            <div class="reply-panel" id="replyPanel" style="display: none;">
+                <div class="reply-info" id="replyInfo">
+                    <span>↩️</span> Ответ на сообщение
+                </div>
+                <button class="cancel-reply" id="cancelReplyBtn">✕</button>
             </div>
-            <button class="cancel-reply" id="cancelReplyBtn">✕</button>
-        </div>
 
-        <!-- ПАНЕЛЬ ВВОДА -->
-        <div class="input-panel">
-            <div class="message-field">
-                <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+            <!-- ПАНЕЛЬ ВВОДА - ТЕПЕРЬ ВИДНА ВСЕГДА! -->
+            <div class="input-panel">
+                <div class="message-field">
+                    <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+                </div>
+                <button class="send-btn" id="sendBtn" disabled>➤</button>
             </div>
-            <button class="send-btn" id="sendBtn" disabled>➤</button>
         </div>
     </div>
 
@@ -867,7 +929,7 @@
         let activeListeners = [];
         
         // ПЕРЕМЕННЫЕ ДЛЯ ОТВЕТОВ
-        let replyingTo = null; // { id, username, text }
+        let replyingTo = null;
 
         // =============================================
         // DOM ЭЛЕМЕНТЫ
@@ -901,17 +963,48 @@
             sendBtn: document.getElementById('sendBtn'),
             notification: document.getElementById('notification'),
             notificationText: document.getElementById('notification-text'),
-            // Элементы для ответов
             replyPanel: document.getElementById('replyPanel'),
             replyInfo: document.getElementById('replyInfo'),
             cancelReplyBtn: document.getElementById('cancelReplyBtn')
         };
 
         // =============================================
+        // ИСПРАВЛЕНИЕ ДЛЯ МОБИЛЬНЫХ БРАУЗЕРОВ!
+        // =============================================
+        function fixMobileViewport() {
+            // Устанавливаем высоту на основе видимой области
+            const setViewportHeight = () => {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                
+                // Для #app
+                const app = document.getElementById('app');
+                if (app) {
+                    app.style.height = `${window.innerHeight}px`;
+                }
+            };
+            
+            setViewportHeight();
+            
+            // Обновляем при изменении размера
+            window.addEventListener('resize', setViewportHeight);
+            window.addEventListener('orientationchange', setViewportHeight);
+            
+            // Прокручиваем вниз при открытии клавиатуры
+            window.addEventListener('resize', () => {
+                if (document.activeElement === elements.messageInput) {
+                    setTimeout(scrollToBottom, 100);
+                }
+            });
+        }
+
+        // =============================================
         // ИНИЦИАЛИЗАЦИЯ
         // =============================================
         async function init() {
             try {
+                fixMobileViewport(); // Вызываем исправление!
+                
                 await auth.signInAnonymously();
                 currentUser = auth.currentUser;
                 
@@ -1040,8 +1133,6 @@
         // =============================================
         // ФУНКЦИИ ДЛЯ ОТВЕТОВ
         // =============================================
-        
-        // Начать ответ на сообщение
         function startReply(messageId, username, text) {
             replyingTo = {
                 id: messageId,
@@ -1059,7 +1150,6 @@
             showNotification(`↩️ Ответ на сообщение от ${username}`, 'info');
         }
 
-        // Отменить ответ
         function cancelReply() {
             replyingTo = null;
             elements.replyPanel.style.display = 'none';
@@ -1081,7 +1171,6 @@
                     path = `group_messages/${currentChat.id}/${messageId}`;
                 }
                 
-                // Вместо удаления - помечаем как удаленное
                 await db.ref(path).update({
                     text: '🚫 Сообщение удалено',
                     deleted: true,
@@ -1097,7 +1186,7 @@
         }
 
         // =============================================
-        // ОТПРАВКА СООБЩЕНИЯ (С ПОДДЕРЖКОЙ ОТВЕТОВ)
+        // ОТПРАВКА СООБЩЕНИЯ
         // =============================================
         async function sendMessage() {
             const text = elements.messageInput.value.trim();
@@ -1117,7 +1206,6 @@
                 }
             };
             
-            // Добавляем информацию об ответе, если есть
             if (replyingTo) {
                 messageData.replyTo = replyingTo.id;
                 messageData.replyToUsername = replyingTo.username;
@@ -1151,8 +1239,8 @@
                 elements.messageInput.style.height = 'auto';
                 elements.sendBtn.disabled = true;
                 
-                // Сбрасываем ответ
                 cancelReply();
+                scrollToBottom();
                 
             } catch (error) {
                 console.error('Ошибка отправки:', error);
@@ -1161,7 +1249,7 @@
         }
 
         // =============================================
-        // СОЗДАНИЕ ЭЛЕМЕНТА СООБЩЕНИЯ (С КНОПКАМИ)
+        // СОЗДАНИЕ ЭЛЕМЕНТА СООБЩЕНИЯ
         // =============================================
         function createMessageElement(message) {
             const isMyMessage = currentUser && message.userId === currentUser.uid;
@@ -1181,7 +1269,6 @@
             const username = message.username || 'Неизвестный';
             let text = message.text || '';
             
-            // Блок ответа (цитата)
             let replyBlock = '';
             if (message.replyTo) {
                 const replyUsername = message.replyToUsername || 'Пользователь';
@@ -1194,7 +1281,6 @@
                 `;
             }
             
-            // Кнопки действий (только для не удаленных сообщений)
             let actionButtons = '';
             if (!isDeleted) {
                 actionButtons = `
@@ -1205,7 +1291,6 @@
                 `;
             }
             
-            // Текст сообщения (с пометкой удалено)
             let messageText = '';
             if (isDeleted) {
                 messageText = `<div class="message-text deleted">🚫 Сообщение удалено</div>`;
@@ -1337,7 +1422,7 @@
         // =============================================
         function switchToPrivateChat(chatId, targetUserId) {
             removeAllListeners();
-            cancelReply(); // Сбрасываем ответ
+            cancelReply();
             
             currentChat = {
                 type: 'private',
@@ -1364,7 +1449,7 @@
         // =============================================
         function switchToGroupChat(groupId, groupName) {
             removeAllListeners();
-            cancelReply(); // Сбрасываем ответ
+            cancelReply();
             
             currentChat = {
                 type: 'group',
@@ -1384,7 +1469,7 @@
         // =============================================
         function switchToGeneralChat() {
             removeAllListeners();
-            cancelReply(); // Сбрасываем ответ
+            cancelReply();
             
             currentChat = {
                 type: 'general',
@@ -1809,29 +1894,23 @@
         // НАСТРОЙКА ОБРАБОТЧИКОВ
         // =============================================
         function setupEventListeners() {
-            // Мобильное меню
             elements.menuBtn.addEventListener('click', toggleMobileNav);
             elements.navOverlay.addEventListener('click', closeMobileNav);
             
-            // Профиль
             elements.saveProfileBtn.addEventListener('click', saveProfile);
             elements.navId.addEventListener('click', copyUserId);
             elements.copyCurrentIdBtn.addEventListener('click', copyUserId);
             
-            // Приватные чаты
             elements.createPrivateChatBtn.addEventListener('click', createPrivateChat);
             
-            // Группы
             elements.createGroupBtn.addEventListener('click', createGroup);
             elements.joinGroupBtn.addEventListener('click', joinGroup);
             
-            // Общий чат
             elements.generalChatBtn.addEventListener('click', () => {
                 switchToGeneralChat();
                 closeMobileNav();
             });
             
-            // Отправка сообщений
             elements.sendBtn.addEventListener('click', sendMessage);
             
             elements.messageInput.addEventListener('keypress', (e) => {
@@ -1847,13 +1926,10 @@
                 elements.sendBtn.disabled = !this.value.trim();
             });
             
-            // Тема
             elements.themeToggle.addEventListener('click', toggleTheme);
             
-            // Отмена ответа
             elements.cancelReplyBtn.addEventListener('click', cancelReply);
             
-            // Enter в полях
             elements.privateUserId.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') createPrivateChat();
             });
