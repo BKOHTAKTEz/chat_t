@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Общий чат</title>
+    <title>Чат - Общий, Личные, Группы</title>
     <style>
         :root {
             --primary: #4a76a8;
@@ -19,6 +19,8 @@
             --message-bg: #ffffff;
             --my-message-bg: #e1ffc7;
             --sidebar-bg: #ffffff;
+            --private: #9b59b6;
+            --group: #3498db;
         }
         
         * {
@@ -115,6 +117,9 @@
             padding-bottom: 10px;
             border-bottom: 2px solid var(--border);
             font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .form-group {
@@ -163,6 +168,79 @@
             background: var(--success);
         }
         
+        .btn-private {
+            background: var(--private);
+        }
+        
+        .btn-group {
+            background: var(--group);
+        }
+        
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+        
+        /* Список диалогов */
+        .chats-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 5px;
+            border: 1px solid transparent;
+        }
+        
+        .chat-item:hover {
+            background: rgba(0,0,0,0.05);
+            border-color: var(--border);
+        }
+        
+        .chat-item.active {
+            background: rgba(74, 118, 168, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .chat-info {
+            flex: 1;
+        }
+        
+        .chat-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--dark);
+        }
+        
+        .chat-last-message {
+            font-size: 0.8rem;
+            color: var(--gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+        }
+        
         /* Чат */
         .chat-container {
             flex: 1;
@@ -186,9 +264,27 @@
             flex-shrink: 0;
         }
         
+        .chat-header.private {
+            background: var(--private);
+        }
+        
+        .chat-header.group {
+            background: var(--group);
+        }
+        
         .chat-title {
             font-size: 1.1rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chat-type-badge {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
         }
         
         .online-indicator {
@@ -353,6 +449,19 @@
             opacity: 0.6;
         }
         
+        /* Код приглашения */
+        .invite-code {
+            background: rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            color: var(--dark);
+            margin: 10px 0;
+        }
+        
         /* Уведомления */
         .notification {
             position: fixed;
@@ -390,6 +499,14 @@
         
         .notification.info {
             background: var(--primary);
+        }
+        
+        .notification.private {
+            background: var(--private);
+        }
+        
+        .notification.group {
+            background: var(--group);
         }
         
         /* Переключатель темы */
@@ -470,7 +587,7 @@
     <button class="theme-toggle" id="theme-toggle">🌙</button>
     
     <div class="app-container">
-        <!-- Боковая панель (профиль) - УПРОЩЕННАЯ -->
+        <!-- Боковая панель -->
         <aside class="sidebar">
             <div class="profile-section">
                 <img src="https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200" 
@@ -480,7 +597,7 @@
             </div>
             
             <div class="sidebar-section">
-                <h3>Ваш профиль</h3>
+                <h3>👤 Ваш профиль</h3>
                 <form id="profile-form">
                     <div class="form-group">
                         <label for="username">Ваше имя</label>
@@ -492,15 +609,73 @@
                     </button>
                 </form>
             </div>
+            
+            <div class="sidebar-section">
+                <h3>💌 Личные сообщения</h3>
+                <div class="form-group">
+                    <label for="private-user-id">ID пользователя</label>
+                    <input type="text" id="private-user-id" class="form-control" 
+                           placeholder="Введите ID получателя">
+                </div>
+                <button class="btn btn-private" id="create-private-chat">
+                    Написать лично
+                </button>
+                
+                <div style="margin-top: 15px;">
+                    <label style="display: block; margin-bottom: 10px; font-size: 0.9rem;">Ваши диалоги:</label>
+                    <div id="private-chats-list" class="chats-list">
+                        <div class="loading" style="padding: 10px;">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>👥 Группы</h3>
+                <div class="form-group">
+                    <label for="group-name">Название группы</label>
+                    <input type="text" id="group-name" class="form-control" 
+                           placeholder="Введите название">
+                </div>
+                <button class="btn btn-group" id="create-group">
+                    Создать группу
+                </button>
+                
+                <div style="margin: 15px 0;">
+                    <hr style="border-color: var(--border); margin: 15px 0;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="invite-code">Код приглашения</label>
+                    <input type="text" id="invite-code" class="form-control" 
+                           placeholder="Введите 6-значный код">
+                </div>
+                <button class="btn btn-success" id="join-group">
+                    Присоединиться
+                </button>
+                
+                <div style="margin-top: 15px;">
+                    <label style="display: block; margin-bottom: 10px; font-size: 0.9rem;">Ваши группы:</label>
+                    <div id="groups-list" class="chats-list">
+                        <div class="loading" style="padding: 10px;">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>🏠 Общий чат</h3>
+                <button class="btn" id="switch-to-general">
+                    Перейти в общий чат
+                </button>
+            </div>
         </aside>
         
         <!-- Чат -->
         <main class="chat-container">
-            <div class="chat-header">
-                <div class="chat-title">
-                    <span style="margin-right: 8px;">💬</span>Общий чат
+            <div class="chat-header" id="chat-header">
+                <div class="chat-title" id="chat-title">
+                    <span>💬</span> Общий чат
                 </div>
-                <div class="online-indicator">
+                <div class="online-indicator" id="online-indicator">
                     <span class="online-dot"></span>
                     <span id="online-text">0 онлайн</span>
                 </div>
@@ -536,7 +711,7 @@
     
     <script>
         // =============================================
-        // КОНФИГУРАЦИЯ FIREBASE - РАБОТАЕТ НА GITHUB PAGES
+        // КОНФИГУРАЦИЯ FIREBASE
         // =============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBuJoMVcS2wLS4PWc8wwsQl3ssf_hY-OyU",
@@ -561,6 +736,16 @@
             username: 'Гость',
             avatarUrl: 'https://ui-avatars.com/api/?name=Guest&background=4a76a8&color=fff&size=200'
         };
+        
+        // Текущий активный чат
+        let currentChat = {
+            type: 'general', // 'general', 'private', 'group'
+            id: null,        // для private: chatId, для group: groupId
+            name: 'Общий чат'
+        };
+
+        // Слушатели Firebase
+        let activeListeners = [];
 
         // =============================================
         // ЭЛЕМЕНТЫ DOM
@@ -578,41 +763,48 @@
             notification: document.getElementById('notification'),
             notificationText: document.getElementById('notification-text'),
             themeToggle: document.getElementById('theme-toggle'),
-            onlineText: document.getElementById('online-text')
+            onlineText: document.getElementById('online-text'),
+            chatHeader: document.getElementById('chat-header'),
+            chatTitle: document.getElementById('chat-title'),
+            privateUserId: document.getElementById('private-user-id'),
+            createPrivateChat: document.getElementById('create-private-chat'),
+            groupName: document.getElementById('group-name'),
+            createGroup: document.getElementById('create-group'),
+            inviteCode: document.getElementById('invite-code'),
+            joinGroup: document.getElementById('join-group'),
+            switchToGeneral: document.getElementById('switch-to-general'),
+            privateChatsList: document.getElementById('private-chats-list'),
+            groupsList: document.getElementById('groups-list')
         };
 
         // =============================================
-        // ИНИЦИАЛИЗАЦИЯ - ЗАПУСКАЕТСЯ СРАЗУ
+        // ИНИЦИАЛИЗАЦИЯ
         // =============================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Запуск чата на GitHub Pages...');
             
-            // Инициализация темы
             initTheme();
-            
-            // Настройка обработчиков
             setupEventListeners();
             
-            // АНОНИМНАЯ АУТЕНТИФИКАЦИЯ - РАБОТАЕТ ВЕЗДЕ
             auth.signInAnonymously()
                 .then(() => {
                     console.log('✅ Аутентификация успешна');
                     currentUser = auth.currentUser;
                     initUser();
-                    loadMessages();
+                    loadGeneralMessages();
                     setupPresence();
+                    loadPrivateChats();
+                    loadUserGroups();
                 })
                 .catch(error => {
                     console.error('❌ Ошибка аутентификации:', error);
                     showNotification('Ошибка подключения к чату', 'error');
-                    
-                    // РЕЖИМ ОФЛАЙН - работаем без аутентификации
                     enableOfflineMode();
                 });
         });
 
         // =============================================
-        // РЕЖИМ ОФЛАЙН (ЕСЛИ НЕТ АУТЕНТИФИКАЦИИ)
+        // РЕЖИМ ОФЛАЙН
         // =============================================
         function enableOfflineMode() {
             console.log('⚠️ Работа в офлайн-режиме');
@@ -631,14 +823,18 @@
         function initUser() {
             if (!currentUser) return;
             
-            // Генерируем имя из ID
-            const randomName = 'User_' + currentUser.uid.substring(0, 4);
-            userProfile.username = randomName;
-            userProfile.avatarUrl = `https://ui-avatars.com/api/?name=${randomName}&background=4a76a8&color=fff&size=200`;
+            const savedName = localStorage.getItem('chat_username');
+            if (savedName) {
+                userProfile.username = savedName;
+                userProfile.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(savedName)}&background=4a76a8&color=fff&size=200`;
+            } else {
+                const randomName = 'User_' + currentUser.uid.substring(0, 4);
+                userProfile.username = randomName;
+                userProfile.avatarUrl = `https://ui-avatars.com/api/?name=${randomName}&background=4a76a8&color=fff&size=200`;
+            }
             
             updateProfileUI();
             
-            // Сохраняем в Firebase (если доступно)
             try {
                 database.ref('users/' + currentUser.uid).set({
                     username: userProfile.username,
@@ -661,13 +857,14 @@
         }
 
         // =============================================
-        // ЗАГРУЗКА СООБЩЕНИЙ - КЛЮЧЕВАЯ ФУНКЦИЯ
+        // ЗАГРУЗКА СООБЩЕНИЙ ОБЩЕГО ЧАТА
         // =============================================
-        function loadMessages() {
+        function loadGeneralMessages() {
+            removeAllListeners();
+            
             try {
                 const messagesRef = database.ref('messages');
-                
-                messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
                     elements.loadingMessages.style.display = 'none';
                     
                     const messages = [];
@@ -679,16 +876,79 @@
                     });
                     
                     renderMessages(messages);
-                }, (error) => {
-                    console.error('Ошибка загрузки сообщений:', error);
-                    elements.loadingMessages.style.display = 'none';
-                    elements.emptyChat.style.display = 'block';
-                    elements.emptyChat.textContent = 'Не удалось загрузить сообщения. Проверьте подключение.';
                 });
+                
+                activeListeners.push({ ref: messagesRef, listener });
             } catch (e) {
-                console.error('Критическая ошибка:', e);
+                console.error('Ошибка загрузки сообщений:', e);
                 elements.loadingMessages.style.display = 'none';
             }
+        }
+
+        // =============================================
+        // ЗАГРУЗКА ПРИВАТНЫХ СООБЩЕНИЙ
+        // =============================================
+        function loadPrivateMessages(chatId) {
+            removeAllListeners();
+            
+            try {
+                const messagesRef = database.ref(`private_messages/${chatId}`);
+                const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                    elements.loadingMessages.style.display = 'none';
+                    
+                    const messages = [];
+                    snapshot.forEach((childSnapshot) => {
+                        messages.push({
+                            id: childSnapshot.key,
+                            ...childSnapshot.val()
+                        });
+                    });
+                    
+                    renderMessages(messages);
+                });
+                
+                activeListeners.push({ ref: messagesRef, listener });
+            } catch (e) {
+                console.error('Ошибка загрузки приватных сообщений:', e);
+            }
+        }
+
+        // =============================================
+        // ЗАГРУЗКА ГРУППОВЫХ СООБЩЕНИЙ
+        // =============================================
+        function loadGroupMessages(groupId) {
+            removeAllListeners();
+            
+            try {
+                const messagesRef = database.ref(`group_messages/${groupId}`);
+                const listener = messagesRef.orderByChild('timestamp/seconds').limitToLast(50).on('value', (snapshot) => {
+                    elements.loadingMessages.style.display = 'none';
+                    
+                    const messages = [];
+                    snapshot.forEach((childSnapshot) => {
+                        messages.push({
+                            id: childSnapshot.key,
+                            ...childSnapshot.val()
+                        });
+                    });
+                    
+                    renderMessages(messages);
+                });
+                
+                activeListeners.push({ ref: messagesRef, listener });
+            } catch (e) {
+                console.error('Ошибка загрузки групповых сообщений:', e);
+            }
+        }
+
+        // =============================================
+        // УДАЛЕНИЕ ВСЕХ СЛУШАТЕЛЕЙ
+        // =============================================
+        function removeAllListeners() {
+            activeListeners.forEach(item => {
+                item.ref.off('value', item.listener);
+            });
+            activeListeners = [];
         }
 
         // =============================================
@@ -704,7 +964,6 @@
             
             elements.emptyChat.style.display = 'none';
             
-            // Сортировка по времени
             messages.sort((a, b) => {
                 const timeA = a.timestamp?.seconds || 0;
                 const timeB = b.timestamp?.seconds || 0;
@@ -720,7 +979,7 @@
         }
 
         // =============================================
-        // СОЗДАНИЕ СООБЩЕНИЯ
+        // СОЗДАНИЕ ЭЛЕМЕНТА СООБЩЕНИЯ
         // =============================================
         function createMessageElement(message) {
             const isMyMessage = currentUser && message.userId === currentUser.uid;
@@ -728,7 +987,6 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isMyMessage ? 'my-message' : ''}`;
             
-            // Форматируем время
             let timeText = '';
             if (message.timestamp?.seconds) {
                 const date = new Date(message.timestamp.seconds * 1000);
@@ -756,7 +1014,7 @@
         }
 
         // =============================================
-        // ОТПРАВКА СООБЩЕНИЯ - САМАЯ ВАЖНАЯ ФУНКЦИЯ
+        // ОТПРАВКА СООБЩЕНИЯ
         // =============================================
         async function sendMessage() {
             const text = elements.messageInput.value.trim();
@@ -766,29 +1024,52 @@
                 return;
             }
             
+            if (!currentUser) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+            
             try {
-                // СОЗДАЕМ СООБЩЕНИЕ В ФОРМАТЕ FIREBASE
                 const messageData = {
                     text: text,
-                    userId: currentUser?.uid || 'anonymous_' + Date.now(),
-                    username: userProfile.username || 'Гость',
+                    userId: currentUser.uid,
+                    username: userProfile.username,
                     avatar: 'default',
-                    avatarUrl: userProfile.avatarUrl || 'https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&size=200',
+                    avatarUrl: userProfile.avatarUrl,
                     timestamp: {
                         seconds: Math.floor(Date.now() / 1000),
                         nanoseconds: 0
                     }
                 };
 
-                console.log('📤 Отправка сообщения:', messageData);
+                console.log('📤 Отправка сообщения в чат:', currentChat.type, currentChat.id);
                 
-                // Отправляем в Firebase
-                const messagesRef = database.ref('messages');
-                await messagesRef.push(messageData);
+                if (currentChat.type === 'general') {
+                    await database.ref('messages').push(messageData);
+                } else if (currentChat.type === 'private' && currentChat.id) {
+                    await database.ref(`private_messages/${currentChat.id}`).push(messageData);
+                    
+                    // Обновляем lastMessage в private_chats
+                    await database.ref(`private_chats/${currentChat.id}/lastMessage`).set({
+                        text: text,
+                        timestamp: messageData.timestamp.seconds,
+                        senderId: currentUser.uid,
+                        senderName: userProfile.username
+                    });
+                } else if (currentChat.type === 'group' && currentChat.id) {
+                    await database.ref(`group_messages/${currentChat.id}`).push(messageData);
+                    
+                    // Обновляем lastMessage в groups
+                    await database.ref(`groups/${currentChat.id}/lastMessage`).set({
+                        text: text,
+                        timestamp: messageData.timestamp.seconds,
+                        senderId: currentUser.uid,
+                        senderName: userProfile.username
+                    });
+                }
                 
                 console.log('✅ Сообщение отправлено!');
                 
-                // Очищаем поле ввода
                 elements.messageInput.value = '';
                 elements.messageInput.style.height = 'auto';
                 elements.sendBtn.disabled = true;
@@ -802,10 +1083,475 @@
         }
 
         // =============================================
+        // СОЗДАНИЕ ПРИВАТНОГО ЧАТА
+        // =============================================
+        async function createPrivateChat() {
+            const targetUserId = elements.privateUserId.value.trim();
+            
+            if (!targetUserId) {
+                showNotification('Введите ID пользователя', 'error');
+                return;
+            }
+            
+            if (!currentUser) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+            
+            if (targetUserId === currentUser.uid) {
+                showNotification('Нельзя создать чат с самим собой', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('🔄 Создание приватного чата...', 'info');
+                
+                // Генерируем chatId (сортируем ID для уникальности)
+                const userIds = [currentUser.uid, targetUserId].sort();
+                const chatId = `${userIds[0]}_${userIds[1]}`;
+                
+                // Создаем или обновляем чат
+                const chatData = {
+                    participants: {
+                        [currentUser.uid]: {
+                            username: userProfile.username,
+                            avatarUrl: userProfile.avatarUrl,
+                            joinedAt: Math.floor(Date.now() / 1000)
+                        },
+                        [targetUserId]: {
+                            username: targetUserId.substring(0, 8), // Временно
+                            avatarUrl: `https://ui-avatars.com/api/?name=${targetUserId.substring(0, 4)}&background=9b59b6&color=fff&size=200`,
+                            joinedAt: Math.floor(Date.now() / 1000)
+                        }
+                    },
+                    createdAt: Math.floor(Date.now() / 1000)
+                };
+                
+                await database.ref(`private_chats/${chatId}`).set(chatData);
+                
+                // Переключаемся на этот чат
+                switchToPrivateChat(chatId, targetUserId);
+                
+                // Очищаем поле ввода
+                elements.privateUserId.value = '';
+                
+                showNotification('✅ Приватный чат создан!', 'private');
+                
+                // Обновляем список чатов
+                loadPrivateChats();
+                
+            } catch (error) {
+                console.error('❌ Ошибка создания приватного чата:', error);
+                showNotification('Ошибка создания чата', 'error');
+            }
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ПРИВАТНЫЙ ЧАТ
+        // =============================================
+        function switchToPrivateChat(chatId, targetUserId) {
+            currentChat = {
+                type: 'private',
+                id: chatId,
+                name: `Чат с ${targetUserId.substring(0, 8)}...`
+            };
+            
+            // Обновляем заголовок
+            elements.chatHeader.className = 'chat-header private';
+            elements.chatTitle.innerHTML = `<span>💌</span> ${currentChat.name}`;
+            
+            // Загружаем сообщения
+            loadPrivateMessages(chatId);
+            
+            // Обновляем активный элемент в списке
+            highlightActiveChat('private', chatId);
+        }
+
+        // =============================================
+        // ЗАГРУЗКА СПИСКА ПРИВАТНЫХ ЧАТОВ
+        // =============================================
+        function loadPrivateChats() {
+            if (!currentUser) return;
+            
+            try {
+                const chatsRef = database.ref('private_chats');
+                
+                chatsRef.on('value', (snapshot) => {
+                    const chats = [];
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        const chat = childSnapshot.val();
+                        const chatId = childSnapshot.key;
+                        
+                        // Проверяем, участвует ли текущий пользователь в этом чате
+                        if (chat.participants && chat.participants[currentUser.uid]) {
+                            // Находим собеседника
+                            let otherUserId = null;
+                            for (const uid in chat.participants) {
+                                if (uid !== currentUser.uid) {
+                                    otherUserId = uid;
+                                    break;
+                                }
+                            }
+                            
+                            const otherUser = chat.participants[otherUserId] || {};
+                            
+                            chats.push({
+                                id: chatId,
+                                otherUserId: otherUserId,
+                                username: otherUser.username || otherUserId.substring(0, 8),
+                                avatarUrl: otherUser.avatarUrl || `https://ui-avatars.com/api/?name=${otherUserId.substring(0, 4)}&background=9b59b6&color=fff&size=200`,
+                                lastMessage: chat.lastMessage?.text || 'Нет сообщений',
+                                lastTime: chat.lastMessage?.timestamp || chat.createdAt
+                            });
+                        }
+                    });
+                    
+                    // Сортируем по времени последнего сообщения
+                    chats.sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
+                    
+                    renderPrivateChatsList(chats);
+                });
+            } catch (e) {
+                console.error('Ошибка загрузки приватных чатов:', e);
+            }
+        }
+
+        // =============================================
+        // ОТОБРАЖЕНИЕ СПИСКА ПРИВАТНЫХ ЧАТОВ
+        // =============================================
+        function renderPrivateChatsList(chats) {
+            if (!elements.privateChatsList) return;
+            
+            if (chats.length === 0) {
+                elements.privateChatsList.innerHTML = '<div style="padding: 10px; color: var(--gray);">Нет диалогов</div>';
+                return;
+            }
+            
+            let html = '';
+            chats.forEach(chat => {
+                const isActive = currentChat.type === 'private' && currentChat.id === chat.id;
+                html += `
+                    <div class="chat-item ${isActive ? 'active' : ''}" onclick="window.switchToPrivateChat('${chat.id}', '${chat.otherUserId}')">
+                        <img src="${chat.avatarUrl}" class="chat-avatar" alt="Аватар">
+                        <div class="chat-info">
+                            <div class="chat-name">${escapeHtml(chat.username)}</div>
+                            <div class="chat-last-message">${escapeHtml(chat.lastMessage.substring(0, 30))}${chat.lastMessage.length > 30 ? '...' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            elements.privateChatsList.innerHTML = html;
+        }
+
+        // =============================================
+        // СОЗДАНИЕ ГРУППЫ
+        // =============================================
+        async function createGroup() {
+            const groupName = elements.groupName.value.trim();
+            
+            if (!groupName) {
+                showNotification('Введите название группы', 'error');
+                return;
+            }
+            
+            if (!currentUser) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('🔄 Создание группы...', 'info');
+                
+                // Генерируем 6-значный код приглашения
+                const inviteCode = generateInviteCode();
+                
+                // Создаем запись группы
+                const groupData = {
+                    name: groupName,
+                    creator: currentUser.uid,
+                    createdAt: Math.floor(Date.now() / 1000),
+                    inviteCode: inviteCode,
+                    participants: {
+                        [currentUser.uid]: {
+                            username: userProfile.username,
+                            avatarUrl: userProfile.avatarUrl,
+                            role: 'creator',
+                            joinedAt: Math.floor(Date.now() / 1000)
+                        }
+                    }
+                };
+                
+                // Добавляем группу
+                const groupRef = await database.ref('groups').push(groupData);
+                const groupId = groupRef.key;
+                
+                // Сохраняем код приглашения для быстрого поиска
+                await database.ref(`invite_codes/${inviteCode}`).set({
+                    groupId: groupId,
+                    createdAt: Math.floor(Date.now() / 1000),
+                    createdBy: currentUser.uid
+                });
+                
+                // Показываем код пользователю
+                showInviteCode(inviteCode);
+                
+                // Переключаемся на групповой чат
+                switchToGroupChat(groupId, groupName);
+                
+                // Очищаем поле ввода
+                elements.groupName.value = '';
+                
+                showNotification(`✅ Группа "${groupName}" создана!`, 'group');
+                
+                // Обновляем список групп
+                loadUserGroups();
+                
+            } catch (error) {
+                console.error('❌ Ошибка создания группы:', error);
+                showNotification('Ошибка создания группы', 'error');
+            }
+        }
+
+        // =============================================
+        // ПРИСОЕДИНЕНИЕ К ГРУППЕ ПО КОДУ
+        // =============================================
+        async function joinGroup() {
+            const code = elements.inviteCode.value.trim().toUpperCase();
+            
+            if (!code) {
+                showNotification('Введите код приглашения', 'error');
+                return;
+            }
+            
+            if (!currentUser) {
+                showNotification('Ошибка авторизации', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('🔄 Поиск группы...', 'info');
+                
+                // Ищем группу по коду
+                const inviteSnapshot = await database.ref(`invite_codes/${code}`).once('value');
+                const inviteData = inviteSnapshot.val();
+                
+                if (!inviteData) {
+                    showNotification('❌ Код недействителен', 'error');
+                    return;
+                }
+                
+                const groupId = inviteData.groupId;
+                
+                // Получаем данные группы
+                const groupSnapshot = await database.ref(`groups/${groupId}`).once('value');
+                const groupData = groupSnapshot.val();
+                
+                if (!groupData) {
+                    showNotification('❌ Группа не найдена', 'error');
+                    return;
+                }
+                
+                // Добавляем пользователя в участники
+                const participantsRef = database.ref(`groups/${groupId}/participants/${currentUser.uid}`);
+                await participantsRef.set({
+                    username: userProfile.username,
+                    avatarUrl: userProfile.avatarUrl,
+                    role: 'member',
+                    joinedAt: Math.floor(Date.now() / 1000)
+                });
+                
+                // Переключаемся на групповой чат
+                switchToGroupChat(groupId, groupData.name);
+                
+                // Очищаем поле ввода
+                elements.inviteCode.value = '';
+                
+                showNotification(`✅ Вы присоединились к группе "${groupData.name}"`, 'group');
+                
+                // Обновляем список групп
+                loadUserGroups();
+                
+            } catch (error) {
+                console.error('❌ Ошибка присоединения к группе:', error);
+                showNotification('Ошибка присоединения к группе', 'error');
+            }
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ГРУППОВОЙ ЧАТ
+        // =============================================
+        function switchToGroupChat(groupId, groupName) {
+            currentChat = {
+                type: 'group',
+                id: groupId,
+                name: groupName
+            };
+            
+            // Обновляем заголовок
+            elements.chatHeader.className = 'chat-header group';
+            elements.chatTitle.innerHTML = `<span>👥</span> ${groupName}`;
+            
+            // Загружаем сообщения
+            loadGroupMessages(groupId);
+            
+            // Обновляем активный элемент в списке
+            highlightActiveChat('group', groupId);
+        }
+
+        // =============================================
+        // ПЕРЕКЛЮЧЕНИЕ НА ОБЩИЙ ЧАТ
+        // =============================================
+        function switchToGeneralChat() {
+            currentChat = {
+                type: 'general',
+                id: null,
+                name: 'Общий чат'
+            };
+            
+            // Обновляем заголовок
+            elements.chatHeader.className = 'chat-header';
+            elements.chatTitle.innerHTML = `<span>💬</span> Общий чат`;
+            
+            // Загружаем сообщения
+            loadGeneralMessages();
+            
+            // Убираем активные классы
+            highlightActiveChat('general', null);
+        }
+
+        // =============================================
+        // ЗАГРУЗКА СПИСКА ГРУПП ПОЛЬЗОВАТЕЛЯ
+        // =============================================
+        function loadUserGroups() {
+            if (!currentUser) return;
+            
+            try {
+                const groupsRef = database.ref('groups');
+                
+                groupsRef.on('value', (snapshot) => {
+                    const groups = [];
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        const group = childSnapshot.val();
+                        const groupId = childSnapshot.key;
+                        
+                        // Проверяем, является ли пользователь участником
+                        if (group.participants && group.participants[currentUser.uid]) {
+                            groups.push({
+                                id: groupId,
+                                name: group.name,
+                                inviteCode: group.inviteCode,
+                                creator: group.creator,
+                                participantsCount: Object.keys(group.participants || {}).length,
+                                lastMessage: group.lastMessage?.text || 'Нет сообщений',
+                                lastTime: group.lastMessage?.timestamp || group.createdAt,
+                                avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(group.name.substring(0, 2))}&background=3498db&color=fff&size=200`
+                            });
+                        }
+                    });
+                    
+                    // Сортируем по времени последнего сообщения
+                    groups.sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
+                    
+                    renderGroupsList(groups);
+                });
+            } catch (e) {
+                console.error('Ошибка загрузки групп:', e);
+            }
+        }
+
+        // =============================================
+        // ОТОБРАЖЕНИЕ СПИСКА ГРУПП
+        // =============================================
+        function renderGroupsList(groups) {
+            if (!elements.groupsList) return;
+            
+            if (groups.length === 0) {
+                elements.groupsList.innerHTML = '<div style="padding: 10px; color: var(--gray);">Нет групп</div>';
+                return;
+            }
+            
+            let html = '';
+            groups.forEach(group => {
+                const isActive = currentChat.type === 'group' && currentChat.id === group.id;
+                html += `
+                    <div class="chat-item ${isActive ? 'active' : ''}" onclick="window.switchToGroupChat('${group.id}', '${escapeHtml(group.name)}')">
+                        <img src="${group.avatarUrl}" class="chat-avatar" alt="Аватар">
+                        <div class="chat-info">
+                            <div class="chat-name">${escapeHtml(group.name)}</div>
+                            <div class="chat-last-message">👥 ${group.participantsCount} участников • ${escapeHtml(group.lastMessage.substring(0, 20))}</div>
+                        </div>
+                        ${group.creator === currentUser.uid ? '<span class="chat-badge">Создатель</span>' : ''}
+                    </div>
+                `;
+            });
+            
+            elements.groupsList.innerHTML = html;
+        }
+
+        // =============================================
+        // ГЕНЕРАЦИЯ КОДА ПРИГЛАШЕНИЯ
+        // =============================================
+        function generateInviteCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // =============================================
+        // ПОКАЗ КОДА ПРИГЛАШЕНИЯ
+        // =============================================
+        function showInviteCode(code) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notification.className = 'notification group';
+            notification.innerHTML = `
+                <div style="margin-bottom: 10px;">✅ Группа создана!</div>
+                <div style="font-size: 1.8rem; font-weight: bold; letter-spacing: 8px; text-align: center;">${code}</div>
+                <div style="margin-top: 10px;">Сохраните этот код для приглашения друзей</div>
+            `;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+                notification.innerHTML = '<span id="notification-text"></span>';
+            }, 10000);
+        }
+
+        // =============================================
+        // ПОДСВЕТКА АКТИВНОГО ЧАТА
+        // =============================================
+        function highlightActiveChat(type, id) {
+            // Убираем активные классы у всех
+            document.querySelectorAll('.chat-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Добавляем активный класс текущему чату
+            setTimeout(() => {
+                if (type === 'private' && id) {
+                    const selector = `[onclick*="switchToPrivateChat('${id}"]`;
+                    const el = document.querySelector(selector);
+                    if (el) el.classList.add('active');
+                } else if (type === 'group' && id) {
+                    const selector = `[onclick*="switchToGroupChat('${id}"]`;
+                    const el = document.querySelector(selector);
+                    if (el) el.classList.add('active');
+                }
+            }, 100);
+        }
+
+        // =============================================
         // НАСТРОЙКА ОБРАБОТЧИКОВ
         // =============================================
         function setupEventListeners() {
-            // Кнопка отправки
+            // Отправка сообщения
             elements.sendBtn.addEventListener('click', sendMessage);
             
             // Enter для отправки
@@ -824,14 +1570,41 @@
             });
             
             // Сохранение профиля
-            elements.profileForm = document.getElementById('profile-form');
-            elements.profileForm.addEventListener('submit', (e) => {
+            document.getElementById('profile-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 saveProfile();
             });
             
             // Переключение темы
             elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // Создание приватного чата
+            elements.createPrivateChat.addEventListener('click', createPrivateChat);
+            
+            // Создание группы
+            elements.createGroup.addEventListener('click', createGroup);
+            
+            // Присоединение к группе
+            elements.joinGroup.addEventListener('click', joinGroup);
+            
+            // Переключение на общий чат
+            elements.switchToGeneral.addEventListener('click', switchToGeneralChat);
+            
+            // Enter в поле ID пользователя
+            elements.privateUserId.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    createPrivateChat();
+                }
+            });
+            
+            // Enter в поле кода приглашения
+            elements.inviteCode.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    joinGroup();
+                }
+            });
         }
 
         // =============================================
@@ -843,6 +1616,18 @@
                 userProfile.username = username;
                 userProfile.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=4a76a8&color=fff&size=200`;
                 updateProfileUI();
+                
+                // Сохраняем в localStorage
+                localStorage.setItem('chat_username', username);
+                
+                // Обновляем в базе данных
+                if (currentUser) {
+                    database.ref(`users/${currentUser.uid}`).update({
+                        username: username,
+                        avatarUrl: userProfile.avatarUrl
+                    }).catch(e => console.log('Офлайн-режим: пропускаем обновление'));
+                }
+                
                 showNotification('Имя сохранено!');
             }
         }
@@ -870,7 +1655,6 @@
                 console.log('Офлайн-режим: статус не обновляется');
             }
             
-            // Слушаем статусы
             try {
                 database.ref('presence').on('value', (snapshot) => {
                     let onlineCount = 0;
@@ -937,7 +1721,14 @@
         }
 
         // =============================================
-        // ТЕСТ ПОДКЛЮЧЕНИЯ (ДЛЯ ОТЛАДКИ)
+        // ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ
+        // =============================================
+        window.switchToPrivateChat = switchToPrivateChat;
+        window.switchToGroupChat = switchToGroupChat;
+        window.switchToGeneralChat = switchToGeneralChat;
+
+        // =============================================
+        // ТЕСТ ПОДКЛЮЧЕНИЯ
         // =============================================
         window.testFirebase = function() {
             console.log('🔍 ТЕСТ FIREBASE:');
@@ -953,7 +1744,6 @@
             showNotification('Проверьте консоль (F12)', 'info');
         };
 
-        // Авто-тест при загрузке
         setTimeout(() => {
             window.testFirebase();
         }, 2000);
